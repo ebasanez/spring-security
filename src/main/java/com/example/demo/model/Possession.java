@@ -8,8 +8,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import com.example.demo.service.IEntity;
-
 import lombok.Getter;
 import lombok.Setter;
 
@@ -21,7 +19,7 @@ import lombok.Setter;
 @Setter
 @Entity
 @Table(name = "possession")
-public class Possession implements IEntity {
+public class Possession {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,7 +28,7 @@ public class Possession implements IEntity {
 	private String name;
 
 	@ManyToOne
-	@JoinColumn(name="owner_id", nullable = false)
+	@JoinColumn(name = "owner_id", nullable = false)
 	private User owner;
 
 	@Override

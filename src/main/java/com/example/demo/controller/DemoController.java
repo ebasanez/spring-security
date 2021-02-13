@@ -4,8 +4,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import com.example.demo.service.MyService;
-
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -16,12 +14,9 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class DemoController {
 
-	private final MyService myService;
-
 	@GetMapping("hi")
 	@PreAuthorize("isAuthenticated()")
 	public String helloWorld() {
-		myService.myAsyncMethod();
 		System.out.println(Thread.currentThread().getName());
 		return "hello";
 	}
