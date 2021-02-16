@@ -1,13 +1,11 @@
 package es.basa.security.authserver.config.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
@@ -15,7 +13,8 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.A
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
 import org.springframework.security.oauth2.provider.token.TokenStore;
-import org.springframework.security.oauth2.provider.token.store.InMemoryTokenStore;
+import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
+import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 
 // TODO Migrar a Spring Security 5
 
@@ -27,6 +26,9 @@ import org.springframework.security.oauth2.provider.token.store.InMemoryTokenSto
 @EnableAuthorizationServer
 public class AuthorizationServerConfiguration extends AuthorizationServerConfigurerAdapter {
 
+	@Value("${security.oauth2.jwt.signing-key}")
+	private String jwtSigningKey;
+
 	@Autowired
 	//@Qualifier("authenticationManagerBean")
 	private AuthenticationManager authenticationManager;
@@ -34,13 +36,25 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
 	@Value("${server.servlet.context-path}")
 	private String appContextPath;
 
+	// JWT
+
+	/**
+	 * Encodes JWT to have all information OAuth2 requires
+	 * The Resource Server will need have a similar token converter (including the same signing key), in order to decrypt the token (symmetric cypher).
+	 */
+	@Bean
+	public JwtAccessTokenConverter accessTokenConverter() {
+		JwtAccessTokenConverter accessTokenConverter = new JwtAccessTokenConverter();
+		accessTokenConverter.setSigningKey(jwtSigningKey);
+		return accessTokenConverter;
+	}
 	@Bean
 	public TokenStore tokenStore() {
-		return new InMemoryTokenStore();
+		return new JwtTokenStore(accessTokenConverter());
 	}
 
 	@Bean
-	public PasswordEncoder passwordEncoder(){
+	public PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder(10);
 	}
 
@@ -49,7 +63,8 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
 		endpoints
 				.tokenStore(tokenStore())
 				.authenticationManager(authenticationManager)
-				.allowedTokenEndpointRequestMethods(HttpMethod.GET,HttpMethod.POST);
+				.accessTokenConverter(accessTokenConverter()) // Be careful to inject this instead of TokenStore
+				.allowedTokenEndpointRequestMethods(HttpMethod.GET, HttpMethod.POST);
 	}
 
 
