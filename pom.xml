@@ -3,10 +3,12 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <packaging>pom</packaging>
+
     <modules>
-        <module>oauth-server</module>
-        <module>resources-server</module>
+        <module>server</module>
+        <module>client</module>
     </modules>
+
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
@@ -50,16 +52,6 @@
                 <artifactId>spring-boot-starter-validation</artifactId>
             </dependency>
 
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-starter-thymeleaf</artifactId>
-            </dependency>
-
-            <dependency>
-                <groupId>nz.net.ultraq.thymeleaf</groupId>
-                <artifactId>thymeleaf-layout-dialect</artifactId>
-            </dependency>
-
             <!-- Needed since java 1.9: -->
             <!--    API, java.xml.bind module -->
             <dependency>
@@ -74,16 +66,17 @@
                 <version>2.3.2</version>
             </dependency>
 
-            <dependency>
-                <groupId>org.projectlombok</groupId>
-                <artifactId>lombok</artifactId>
-            </dependency>
-
             <!-- Security -->
 
             <dependency>
                 <groupId>org.springframework.security.oauth.boot</groupId>
                 <artifactId>spring-security-oauth2-autoconfigure</artifactId>
+                <version>${spring-oauth2.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.springframework.security.oauth</groupId>
+                <artifactId>spring-security-oauth2</artifactId>
                 <version>${spring-oauth2.version}</version>
             </dependency>
 
@@ -93,17 +86,7 @@
                 <artifactId>spring-security-oauth2</artifactId>
                 <version>2.5.0.RELEASE</version>
             </dependency>
--->
-            <!-- Persistence -->
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-starter-data-jpa</artifactId>
-            </dependency>
-
-            <dependency>
-                <groupId>mysql</groupId>
-                <artifactId>mysql-connector-java</artifactId>
-            </dependency>
+            -->
 
             <!-- Test -->
             <!-- https://mvnrepository.com/artifact/junit/junit -->
@@ -118,6 +101,13 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-starter-test</artifactId>
                 <scope>test</scope>
+            </dependency>
+
+            <!-- Other dependencies -->
+            <dependency>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+                <version>1.18.16</version>
             </dependency>
 
         </dependencies>
