@@ -11,7 +11,12 @@ import com.example.demo.dto.RegisterDto;
  */
 public interface UserService {
 
-	void register(
+	/**
+	 * Register user and generates 2FA QR Image
+	 *
+	 * @return 2FA image content
+	 */
+	String register(
 			@NotNull @Valid RegisterDto dto);
 
 }

@@ -1,19 +1,12 @@
 package com.example.demo.configuration.security;
 
-import javax.sql.DataSource;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.core.session.SessionRegistry;
-import org.springframework.security.core.session.SessionRegistryImpl;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -26,50 +19,36 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 	@Autowired
-	private UserDetailsService userDetailsService;
+	private MyTwoFactorAuthenticationProvider mySecondFactorAuthenticationProvider;
 
 	@Autowired
-	private DataSource dataSource;
+	private CustomWebAuthenticationDetailSource customWebAuthenticationDetailSource;
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		http
 				.authorizeRequests()
-				.anyRequest().permitAll()
+				.antMatchers("/register", "/code").permitAll()
+				.anyRequest().authenticated()
 				//.accessDecisionManager(unanimous()) // 9.4 Custom decision manager
 				.and()
 				.csrf().disable()
 				.formLogin()
+				.loginPage("/login").permitAll() // We will need a custom login page, in order to get an additional "code" field in the form.
+				.loginProcessingUrl("/doLogin")
+				.defaultSuccessUrl("/hello")
+				.authenticationDetailsSource(customWebAuthenticationDetailSource)
 				.and()
-				.logout()
-				.and()
-				.sessionManagement().maximumSessions(100).sessionRegistry(sessionRegistry()).and().sessionFixation().none();
-	}
-
-	/**
-	 * To handle number of active sessions, sessions per user, etc....
-	 */
-	@Bean
-	public SessionRegistry sessionRegistry() {
-		return new SessionRegistryImpl();
-	}
-
-	@Bean
-	AuthenticationProvider daoAuthenticationProvider() {
-		DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider();
-		daoAuthenticationProvider.setUserDetailsService(userDetailsService);
-		daoAuthenticationProvider.setPasswordEncoder(passwordEncoder());
-		return daoAuthenticationProvider;
+				.logout();
 	}
 
 	/**
 	 * Multiple authentication providers
 	 */
 	@Autowired
-	public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+	public void configureGlobal(AuthenticationManagerBuilder auth) {
 		auth
-				.eraseCredentials(false)
-				.authenticationProvider(daoAuthenticationProvider());
+				.authenticationProvider(mySecondFactorAuthenticationProvider);
 	}
 
 	/**
@@ -86,6 +65,5 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 	public PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder(12);
 	}
-
 
 }

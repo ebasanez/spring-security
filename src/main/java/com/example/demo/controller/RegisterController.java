@@ -29,17 +29,19 @@ public class RegisterController {
 	private final UserService userService;
 
 	@GetMapping
-	ModelAndView registerForm() {
+	public ModelAndView registerForm() {
 		return new ModelAndView("register", Map.of("user", new RegisterDto()));
 	}
 
 	@PostMapping
-	String register(@Valid @ModelAttribute("user") RegisterDto user, BindingResult bindingResult) {
+	public ModelAndView register(@Valid @ModelAttribute("user") RegisterDto user, BindingResult bindingResult) {
 		if (bindingResult.hasErrors()) {
-			return "register";
+			return new ModelAndView("register");
 		}
-		userService.register(user);
-		return "redirect:hi";
+		String twoFAImageUri = userService.register(user);
+
+		return new ModelAndView("2FAImage", "uri", twoFAImageUri);
 	}
+
 
 }
