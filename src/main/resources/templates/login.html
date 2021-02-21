@@ -4,10 +4,10 @@
 
 <head>
     <title>Login Page</title>
-
     <link type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet" />
-
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
 </head>
+
 <body>
 <div class="container">
     <h1>Login page</h1>
@@ -15,37 +15,48 @@
     <div th:if="${param.error}" class="alert alert-danger">Invalid username, password or verification code.</div>
     <div th:if="${param.logout}" class="alert alert-success">You have been logged out.</div>
 
-    <form th:action="@{/doLogin}" method="post" class="form-horizontal">
+    <form th:action="@{/doLogin}" method="post" class="form-horizontal" id="submit-form">
 
-        <div class="form-group">
+        <div class="form-group" id="username-block">
             <label class="control-label col-xs-2" for="username"> Username:</label>
             <div class="col-xs-10">
                 <input id="username" type="text" name="username" />
             </div>
         </div>
 
-        <div class="form-group">
+        <div class="form-group" id="password-block">
             <label class="control-label col-xs-2" for="password"> Password: </label>
             <div class="col-xs-10">
                 <input id="password" type="password" name="password" />
             </div>
         </div>
 
-        <div class="form-group">
+        <div class="form-group" style="display:none" id="verification-code-block">
             <label class="control-label col-xs-2" for="code"> Code:</label>
             <div class="col-xs-10">
                 <input id="code" type="text" name="code" />
             </div>
             <br/>
-            <p class="text-muted col-xs-10">Example text: Use Google Authenticator app on your phone to obtain the verification Code</p>
+            <p class="text-muted col-xs-10">Insert verification Code received in your Mobile Phone</p>
         </div>
-
         <input type="submit" class="btn btn-primary" value="Sign In" />
         <br/><br/>
         <a class="btn btn-default" th:href="@{/register}">Sign Up</a>
     </form>
-
-
 </div>
+
+<script>
+    $(document).on('submit','#submit-form',function() {
+        if(!$('#verification-code-block').is(':visible')){
+            $('#username-block').hide()
+            $('#password-block').hide()
+            $('#verification-code-block').show()
+            alert($('#username').val());
+            $.get('/demo/code?username='+$('#username').val())
+            return false;
+        }
+    })
+</script>
+
 </body>
 </html>
