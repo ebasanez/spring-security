@@ -1,0 +1,6 @@
+server.port=8082
+server.servlet.context-path=/auth-server
+
+### OAuth2 Configuration
+# JWT Token signing key. Same key that in the resources server (symmetric cypher)
+security.oauth2.jwt.signing-key=yuioh78oh7io7hb6gbvgb8bu8yg8
