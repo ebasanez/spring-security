@@ -22,16 +22,27 @@ public class UserServiceServiceImpl implements UserService {
 
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
-	private final ToTPService toTPService;
 
 	@Override
-	public String register(@NotNull @Valid RegisterDto dto) {
+	public void register(@NotNull @Valid RegisterDto dto) {
 		User user = new User();
 		user.setUsername(dto.getUsername());
 		user.setPassword(passwordEncoder.encode(dto.getPassword()));
-		user.setSecret(toTPService.generateSecret());
 		userRepository.save(user);
-		return toTPService.getUriForImage(user.getSecret(), user.getUsername());
+	}
+
+	@Override
+	public UserBean findByUsername(@NotNull String username) {
+		return toBean(userRepository.findByUsername(username));
+	}
+
+	private UserBean toBean(User entity) {
+		return UserBean.builder()
+				.id(entity.getId())
+				.username(entity.getUsername())
+				.secret(entity.getSecret())
+				.phone(entity.getPhone())
+				.build();
 	}
 
 }

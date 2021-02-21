@@ -10,6 +10,9 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import com.example.demo.util.TwilioProperties;
+import com.twilio.sdk.TwilioRestClient;
+
 /**
  * @author ebasanez
  * @since 2021-01-14

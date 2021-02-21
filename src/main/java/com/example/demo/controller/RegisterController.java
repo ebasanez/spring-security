@@ -34,13 +34,12 @@ public class RegisterController {
 	}
 
 	@PostMapping
-	public ModelAndView register(@Valid @ModelAttribute("user") RegisterDto user, BindingResult bindingResult) {
+	public String register(@Valid @ModelAttribute("user") RegisterDto user, BindingResult bindingResult) {
 		if (bindingResult.hasErrors()) {
-			return new ModelAndView("register");
+			return "register";
 		}
-		String twoFAImageUri = userService.register(user);
-
-		return new ModelAndView("2FAImage", "uri", twoFAImageUri);
+		userService.register(user);
+		return "hello";
 	}
 
 

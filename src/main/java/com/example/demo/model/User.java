@@ -32,4 +32,7 @@ public class User {
 	@Column(name = "secret")
 	private String secret;
 
+	@Column(name = "phone")
+	private String phone;
+
 }

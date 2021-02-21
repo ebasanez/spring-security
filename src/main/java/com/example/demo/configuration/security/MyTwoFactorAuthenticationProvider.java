@@ -6,6 +6,7 @@ package com.example.demo.configuration.security;
 
 import java.util.Arrays;
 
+import org.jboss.aerogear.security.otp.Totp;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -18,7 +19,6 @@ import org.springframework.stereotype.Component;
 import com.example.demo.configuration.security.CustomWebAuthenticationDetailSource.CustomWebAuthenticationDetails;
 import com.example.demo.model.User;
 import com.example.demo.repository.UserRepository;
-import com.example.demo.service.ToTPService;
 
 /**
  * This class perform two factor authentication:
@@ -34,8 +34,6 @@ public class MyTwoFactorAuthenticationProvider implements AuthenticationProvider
 	@Autowired
 	private PasswordEncoder encoder;
 
-	@Autowired
-	private ToTPService toTPService;
 
 	@Override
 	public Authentication authenticate(Authentication auth) {
@@ -48,10 +46,11 @@ public class MyTwoFactorAuthenticationProvider implements AuthenticationProvider
 		if ((user == null) || !encoder.matches(password, user.getPassword())) {
 			throw new BadCredentialsException("Invalid username or password");
 		}
+
 		// Second factor: Check verification code is valid:
 		// We use a totp (time-based one time password) external library from jboss.
 		try {
-			if (!toTPService.verifyCode(user.getSecret(), verificationCode)) {
+			if (!new Totp (user.getSecret()).verify(verificationCode)) {
 				throw new BadCredentialsException("Invalid verification code");
 			}
 		} catch (final Exception e) {
