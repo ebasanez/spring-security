@@ -14,6 +14,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.example.demo.domain.Principal;
 import com.example.demo.dto.RegisterDto;
 import com.example.demo.model.User;
 import com.example.demo.repository.UserRepository;
@@ -42,48 +43,19 @@ public class UserServiceServiceImpl implements UserService, UserDetailsService {
 	}
 
 	@Override
-	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+	public Principal loadUserByUsername(String username) throws UsernameNotFoundException {
 		User example = new User();
 		example.setUsername(username);
 		return userRepository.findOne(Example.of(example)).map(this::toUserDetails).orElse(null);
 	}
 
-	private UserDetails toUserDetails(User entity) {
-		return MyUserDetails.builder()
+	private Principal toUserDetails(User entity) {
+		return Principal.builder()
 				.username(entity.getUsername())
 				.password(entity.getPassword())
+				.tenant(entity.getTenant())
 				.authorities(Collections.emptySet())
 				.build();
-	}
-
-	@Getter
-	@Builder
-	private static class MyUserDetails implements UserDetails {
-
-		private final String username;
-		private final String password;
-		private final Collection<? extends GrantedAuthority> authorities;
-		private final boolean accountNonExpired = true;
-
-		@Override
-		public boolean isAccountNonExpired() {
-			return true;
-		}
-
-		@Override
-		public boolean isAccountNonLocked() {
-			return true;
-		}
-
-		@Override
-		public boolean isCredentialsNonExpired() {
-			return true;
-		}
-
-		@Override
-		public boolean isEnabled() {
-			return true;
-		}
 	}
 
 }
