@@ -8,14 +8,14 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationDetailsSource;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+
+import com.example.demo.service.UserService;
 
 /**
  * @author ebasanez
@@ -26,7 +26,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 	@Autowired
-	private UserDetailsService userDetailsService;
+	private UserService userService;
 
 	@Bean
 	AuthenticationDetailsSource<HttpServletRequest, String> authenticationDetailsSource() {
@@ -35,10 +35,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 	@Bean
 	AuthenticationProvider tenantAuthenticationProvider() {
-		TenantDaoAuthenticationProvider tenantDaoAuthenticationProvider = new TenantDaoAuthenticationProvider();
-		tenantDaoAuthenticationProvider.setUserDetailsService(userDetailsService);
-		tenantDaoAuthenticationProvider.setPasswordEncoder(passwordEncoder());
-		return tenantDaoAuthenticationProvider;
+		return new TenantAuthenticationProvider(passwordEncoder(), userService);
 	}
 
 	@Override

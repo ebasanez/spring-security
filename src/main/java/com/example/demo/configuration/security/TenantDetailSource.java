@@ -3,7 +3,6 @@ package com.example.demo.configuration.security;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.security.authentication.AuthenticationDetailsSource;
-import org.springframework.stereotype.Component;
 
 /**
  * Will extract a parameter from  the authorization request.
