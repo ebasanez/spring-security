@@ -11,65 +11,55 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
+import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.session.SessionRegistryImpl;
+import org.springframework.security.core.userdetails.MapReactiveUserDetailsService;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.server.SecurityWebFilterChain;
 
 /**
  * @author ebasanez
  * @since 2021-01-14
  */
 @Configuration
-@EnableGlobalMethodSecurity(prePostEnabled = true)
-public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
+@EnableWebFluxSecurity
+public class SecurityConfiguration {
 
-	@Autowired
-	private UserDetailsService userDetailsService;
+	@Bean
+	public MapReactiveUserDetailsService userDetailsService() {
+		UserDetails user = User.builder()
+				.passwordEncoder(passwordEncoder()::encode)
+				.username("user")
+				.password("pass")
+				.roles("USER")
+				.build();
+		UserDetails admin = User.builder()
+				.passwordEncoder(passwordEncoder()::encode)
+				.username("admin")
+				.password("pass")
+				.roles("ADMIN")
+				.build();
+		// Equivalent to InMemoryUserDetails
+		return new MapReactiveUserDetailsService(user, admin);
+	}
 
-	@Autowired
-	private DataSource dataSource;
-
-	@Override
-	protected void configure(HttpSecurity http) throws Exception {
-		http
-				.authorizeRequests()
-				.anyRequest().permitAll()
-				//.accessDecisionManager(unanimous()) // 9.4 Custom decision manager
+	@Bean
+	SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity httpSecurity) {
+		return httpSecurity
+				.authorizeExchange()
+				.pathMatchers("/user/delete").hasRole("ADMIN")
+				.anyExchange().authenticated()
+				.and()
+				.httpBasic()
 				.and()
 				.csrf().disable()
-				.formLogin()
-				.and()
-				.logout()
-				.and()
-				.sessionManagement().maximumSessions(100).sessionRegistry(sessionRegistry()).and().sessionFixation().none();
-	}
-
-	/**
-	 * To handle number of active sessions, sessions per user, etc....
-	 */
-	@Bean
-	public SessionRegistry sessionRegistry() {
-		return new SessionRegistryImpl();
-	}
-
-	@Bean
-	AuthenticationProvider daoAuthenticationProvider() {
-		DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider();
-		daoAuthenticationProvider.setUserDetailsService(userDetailsService);
-		daoAuthenticationProvider.setPasswordEncoder(passwordEncoder());
-		return daoAuthenticationProvider;
-	}
-
-	/**
-	 * Multiple authentication providers
-	 */
-	@Autowired
-	public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-		auth
-				.eraseCredentials(false)
-				.authenticationProvider(daoAuthenticationProvider());
+				.build();
 	}
 
 	/**
