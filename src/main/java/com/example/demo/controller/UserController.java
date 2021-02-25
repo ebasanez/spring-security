@@ -9,6 +9,7 @@ import java.util.stream.Stream;
 import javax.validation.Valid;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -90,7 +91,8 @@ public class UserController {
 			throw new RuntimeException("Expected exception in controller");
 		}
 
-		@DeleteMapping("delete/{id}")
+		@PreAuthorize("hasRole('ADMIN')")
+		@GetMapping("delete/{id}")
 		@ResponseStatus(HttpStatus.NO_CONTENT)
 		public Mono<Void> delete(@PathVariable Integer id) {
 			this.userRepository.deleteUser(id);

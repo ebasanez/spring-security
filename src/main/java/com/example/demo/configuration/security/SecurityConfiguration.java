@@ -9,6 +9,7 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
@@ -29,6 +30,7 @@ import org.springframework.security.web.server.SecurityWebFilterChain;
  */
 @Configuration
 @EnableWebFluxSecurity
+@EnableReactiveMethodSecurity
 public class SecurityConfiguration {
 
 	@Bean
@@ -53,7 +55,6 @@ public class SecurityConfiguration {
 	SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity httpSecurity) {
 		return httpSecurity
 				.authorizeExchange()
-				.pathMatchers("/user/delete").hasRole("ADMIN")
 				.anyExchange().authenticated()
 				.and()
 				.httpBasic()
